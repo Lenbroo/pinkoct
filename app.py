@@ -20,13 +20,16 @@ TARGET_PACKAGES = [
 # --- 2. Data Processing Functions (with Caching) ---
 
 @st.cache_data
-def load_and_process_data(uploaded_file):
+def load_and_process_data(file_path):
     """
-    This function loads and processes the uploaded Excel file.
+    This function loads and processes the Excel file from a given path.
     It returns 6 DataFrames ready for plotting.
     """
     try:
-        df = pd.read_excel(uploaded_file, header=0)
+        df = pd.read_excel(file_path, header=0)
+    except FileNotFoundError:
+        st.error(f"Error: The file '{file_path}' was not found. Please make sure it's in the same folder as the app.")
+        return (pd.DataFrame(),) * 6 # Return 6 empty DataFrames on error
     except Exception as e:
         st.error(f"Error reading the Excel file: {e}")
         return (pd.DataFrame(),) * 6 # Return 6 empty DataFrames on error
@@ -187,50 +190,47 @@ def create_location_chart(location_sales):
 st.title("📈 Women's Health Package Sales Dashboard")
 st.markdown("---")
 
-# File uploader
-uploaded_file = st.file_uploader("📂 Upload your Excel file (e.g., Book11.xlsx) to start analysis", type=["xlsx"])
+# --- MODIFICATION: Load file directly instead of using uploader ---
+# Define the path to your Excel file
+# This file MUST be in the same directory as your sales_dashboard.py file
+file_path = 'Book11.xlsx' 
 
-if uploaded_file is not None:
-    # Load and process the data
-    df_all, summary_pivot, sales_summary, dow_pivot, daily_sales, location_sales = load_and_process_data(uploaded_file)
-    
-    if df_all.empty:
-        st.warning("No data found for the specified packages in the uploaded file. Please check the file.")
-    else:
-        # Display the KPI table first
-        st.header("📊 Key Performance Indicators (KPIs) Summary")
+# Load and process the data
+df_all, summary_pivot, sales_summary, dow_pivot, daily_sales, location_sales = load_and_process_data(file_path)
+
+if df_all.empty:
+    st.warning("No data found for the specified packages in the file. Please check the file content or path.")
+else:
+    # Display the KPI table first
+    st.header("📊 Key Performance Indicators (KPIs) Summary")
         fig_table = create_kpi_table(summary_pivot)
-        st.plotly_chart(fig_table, use_container_width=True)
-        
-        st.markdown("---")
+    st.plotly_chart(fig_table, use_container_width=True)
+    
+    st.markdown("---")
         
         # Split screen for main charts
         st.header("🔍 Campaign Comparative Analysis")
-        col1, col2 = st.columns(2)
-        
-        with col1:
+    col1, col2 = st.columns(2)
+    
+    with col1:
             st.subheader("Total Sales (September vs. October)")
-            fig_total_sales = create_total_sales_chart(sales_summary)
-            st.plotly_chart(fig_total_sales, use_container_width=True)
-            
-        with col2:
-            st.subheader("Sales by Day of Week (DOW) Analysis")
-            fig_dow_heatmap = create_dow_heatmap(dow_pivot)
-            st.plotly_chart(fig_dow_heatmap, use_container_width=True)
-
-        st.markdown("---")
-        st.header("📈 Sales Trends and Location Analysis")
+        fig_total_sales = create_total_sales_chart(sales_summary)
+        st.plotly_chart(fig_total_sales, use_container_width=True)
         
-        # Display longer charts
-        st.subheader("Daily Sales Trend (September & October)")
-        fig_daily_trend = create_daily_trend_chart(daily_sales, df_all)
-        st.plotly_chart(fig_daily_trend, use_container_width=True)
-        
-        st.subheader("Sales Performance by Location")
-        fig_location = create_location_chart(location_sales)
-        st.plotly_chart(fig_location, use_container_width=True)
+    with col2:
+        st.subheader("Sales by Day of Week (DOW) Analysis")
+        fig_dow_heatmap = create_dow_heatmap(dow_pivot)
+        st.plotly_chart(fig_dow_heatmap, use_container_width=True)
 
-else:
-    st.info("Please upload an Excel file to view the dashboard.")
-    st.image("https://placehold.co/1200x400/1e2a40/ffffff?text=Your+Dashboard+is+Waiting...", use_column_width=True)
+    st.markdown("---")
+    st.header("📈 Sales Trends and Location Analysis")
+    
+    # Display longer charts
+    st.subheader("Daily Sales Trend (September & October)")
+    fig_daily_trend = create_daily_trend_chart(daily_sales, df_all)
+    st.plotly_chart(fig_daily_trend, use_container_width=True)
+    
+    st.subheader("Sales Performance by Location")
+    fig_location = create_location_chart(location_sales)
+    st.plotly_chart(fig_location, use_container_width=True)
 
