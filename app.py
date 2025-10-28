@@ -89,7 +89,7 @@ def load_and_process_data(file_path):
     dow_pivot = dow_pivot.reindex(index=['September', 'October'])
 
     # 3. For Daily Trend
-    daily_sales = df_all.groupby(['Date', 'Package']).size().reset_index(name='SalesCount')
+    daily_sales = df_all.groupby(['Date', 'Package']).size().reset_index(name='TotalSales')
 
     # 4. For Location Chart
     location_sales = df_all.groupby(['Month', 'Package', 'Location']).size().reset_index(name='TotalSales')
@@ -154,10 +154,10 @@ def create_daily_trend_chart(daily_sales, df_all):
     fig = px.line(
         daily_sales,
         x='Date',
-        y='SalesCount',
+        y='TotalSales',
         color='Package',
         title='Daily Sales Trend (Sep & Oct)',
-        labels={'SalesCount': 'Number of Sales'},
+        labels={'TotalSales': 'Number of Sales'},
         markers=True
     )
     first_oct_date = df_all[df_all['Month'] == 'October']['Date'].min()
@@ -203,17 +203,17 @@ if df_all.empty:
 else:
     # Display the KPI table first
     st.header("📊 Key Performance Indicators (KPIs) Summary")
-        fig_table = create_kpi_table(summary_pivot)
+    fig_table = create_kpi_table(summary_pivot)
     st.plotly_chart(fig_table, use_container_width=True)
     
     st.markdown("---")
         
         # Split screen for main charts
-        st.header("🔍 Campaign Comparative Analysis")
+    st.header("🔍 Campaign Comparative Analysis")
     col1, col2 = st.columns(2)
     
     with col1:
-            st.subheader("Total Sales (September vs. October)")
+        st.subheader("Total Sales (September vs. October)")
         fig_total_sales = create_total_sales_chart(sales_summary)
         st.plotly_chart(fig_total_sales, use_container_width=True)
         
