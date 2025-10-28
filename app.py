@@ -8,7 +8,7 @@ import numpy as np
 # --- 1. Page Setup and Design ---
 
 # Set the page to "wide" layout and use a dark theme for plots
-st.set_page_config(page_title="Sales Dashboard", layout="wide")
+st.set_page_config(page_title="Pink October", layout="wide")
 pio.templates.default = "plotly_dark"
 
 # Define the target packages
@@ -187,13 +187,13 @@ def create_location_chart(location_sales):
 
 # --- 4. Build the App Interface ---
 
-st.title("📈 Women's Health Package Sales Dashboard")
+st.title("📈 Pink October Campaign analysis")
 st.markdown("---")
 
 # --- MODIFICATION: Load file directly instead of using uploader ---
 # Define the path to your Excel file
 # This file MUST be in the same directory as your sales_dashboard.py file
-file_path = 'Book11.xlsx' 
+file_path = 'Book11 - Copy.xlsx' 
 
 # Load and process the data
 df_all, summary_pivot, sales_summary, dow_pivot, daily_sales, location_sales = load_and_process_data(file_path)
